@@ -2,22 +2,28 @@ version: '3'
 
 services:
   accounts-app:
-    image: take-home/accounts-app-docker:latest
+    build: ./accounts-app
+    image: take-home/accounts-app-docker-1.1
     container_name: accounts
+    ports:
+     - 8081:8081
     environment:
      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE= http://eureka:8761/eureka/
-     - KAFKA_BOOTSTRAPSERVERS= kafka:9092
+     - KAFKA_BROKERCONNECT= kafka:9092
     depends_on:
      - eureka
+     - kafka
   orderdetail-app:
+    build: ./orderdetail-app
     image: take-home/orderdetail-app-docker:latest
     container_name: orderdetails
     environment:
      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE= http://eureka:8761/eureka/
-     - KAFKA_BOOTSTRAPSERVERS= kafka:9092
+     - KAFKA_BOOTSTRAPSERVERS= kafka:9099
     depends_on:
      - eureka
   eureka:
+    build: ./eurekaserver
     image: take-home/eurekaserver-docker:latest
     container_name: eureka
     ports:
@@ -33,11 +39,10 @@ services:
     ports:
      - 9092:9092
     environment:
-      KAFKA_ADVERTISED_HOST_NAME: kafka
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
